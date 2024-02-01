@@ -29,7 +29,7 @@
            02  EMI-NOMI    PIC 9(06).
            02  EMI-NOMB    PIC X(15).
            02  EMI-DEPT    PIC X(03).
-           02  EMI-SUEL    PIC 9(05)V99.
+           02  EMI-SUEL    PIC S9(05)V99.
            02  FILLER      PIC XX.
 
        SD  TMP-FILE.
@@ -44,6 +44,9 @@
        FD  EMPREP.
        01  EMR-REG         PIC X(132).
        WORKING-STORAGE SECTION.
+       77  I               PIC 9.
+       77  NAME-FLAG       PIC 9 VALUE 1.
+       77  DEPT-FLAG       PIC 9 VALUE 1.
        77  MOV-EOF         PIC 9.
        77  TMP-EOF         PIC 9.
        77  LIN             PIC 99.
@@ -55,7 +58,7 @@
        77  EMPL-ST         PIC 9(04).
        77  PERC-ST         PIC 9(08)V99.
        77  DEDU-ST         PIC 9(08)V99.
-       77  SUEL-ST         PIC S9(08)V99.
+       77  SUEL-ST         PIC S9(05)V99.
        77  ORG-EMPL        PIC 9(05).
        77  ORG-PERC        PIC 9(09)V99.
        77  ORG-DEDU        PIC 9(09)V99.
@@ -81,13 +84,25 @@
            03 FECHA-AA     PIC 99.
            03 FECHA-MM     PIC 99.
            03 FECHA-DD     PIC 99.
-       01 MESES.
+       01  MESES.
            03 FILLER       PIC X(36) VALUE
-              "ENEFEBMARABRMAYJUNJULAGOSEPOCTNOVDIC".
-       01 MESES-R REDEFINES MESES.
-          03 MESES-OC OCCURS 12 TIMES.
-             05 MES        PIC X(03).
-
+               "ENEFEBMARABRMAYJUNJULAGOSEPOCTNOVDIC".
+       01  MESES-R REDEFINES MESES.
+           03 MESES-OC OCCURS 12 TIMES.
+               05 MES      PIC X(03).
+       01  DEPT-NAMES.
+           02 DEPT-ROW     OCCURS 7 TIMES.
+               03 DEPT-FULL PIC X(16).
+       01  DEPT-NAMES-F.
+           02 STR-LENGHT-F PIC 99.
+           02 STR-F.
+               03 CHAR-F   PIC X OCCURS 0 TO 20 TIMES
+                           DEPENDING ON STR-LENGHT-F.
+       01  DEPT-NAMES-S.
+           02 STR-LENGHT-S PIC 9.
+           02 STR-S.
+               03 CHAR-S   PIC X OCCURS 0 TO 7 TIMES
+                           DEPENDING ON STR-LENGHT-S.
        01  REPORT-LAYOUT.
       *> 121 CARACTERES
            02 EMS-TIT-0.
@@ -128,7 +143,7 @@
                03 FILLER       PIC X(03) VALUE " | ".
                03 FILLER       PIC X(16) VALUE "  PERCEPCIONES  ".
                03 FILLER       PIC X(03) VALUE " | ".
-               03 FILLER       PIC X(16) VALUE "   DEDUCCION    ".
+               03 FILLER       PIC X(16) VALUE "   DEDUCCIONES  ".
                03 FILLER       PIC XX VALUE " |".
            02 EMS-TAB-SEP.
                03 FILLER       PIC X(08) VALUE SPACES.
@@ -140,9 +155,9 @@
                03 FILLER       PIC X(05) VALUE "=====".
            02 EMS-TAB-INFO.
                03 FILLER       PIC X(08) VALUE SPACES.
-               03 FILLER       PIC X(03) VALUE "|  ".
-               03 EMS-TAB-DEPT PIC X(14).
-               03 FILLER       PIC X(04) VALUE "  | ".
+               03 FILLER       PIC X(02) VALUE "| ".
+               03 EMS-TAB-DEPT PIC X(16).
+               03 FILLER       PIC X(03) VALUE " | ".
                03 FILLER       PIC X(05) VALUE SPACES.
                03 EMS-TAB-NOMI PIC Z(06).
                03 FILLER       PIC X(05) VALUE SPACES.
@@ -173,6 +188,19 @@
                03 EMS-CD-DEDU  PIC $$$,$$$,$$9.99.
                03 FILLER       PIC X(06) VALUE " SUEL:".
                03 EMS-CD-SALA  PIC $$$$,$$$,$$9.99-.
+           02 EMS-CORTE-ORG.
+               03 FILLER       PIC X(5) VALUE SPACES.
+               03 EMS-CO-EMPL  PIC Z(05).
+               03 FILLER       PIC X(17) VALUE " EMPLEADOS EN LA ".
+               03 FILLER       PIC X(12) VALUE "ORGANIZACION".
+               03 FILLER       PIC X(14) VALUE SPACES.
+               03 FILLER       PIC X(05) VALUE "TOTAL".
+               03 FILLER       PIC X(06) VALUE " PERC:".
+               03 EMS-CO-PERC  PIC $$$$,$$$,$$9.99.
+               03 FILLER       PIC X(06) VALUE " DEDU:".
+               03 EMS-CO-DEDU  PIC $$$$,$$$,$$9.99.
+               03 FILLER       PIC X(06) VALUE " SUEL:".
+               03 EMS-CO-SALA  PIC $$$$,$$$,$$9.99-.
        PROCEDURE DIVISION.
        MAIN.
            PERFORM 100-START.
@@ -182,6 +210,7 @@
        100-START.
            DISPLAY "> Running start...".
            PERFORM 101-LOAD-DATE.
+           PERFORM 102-LOAD-DEPT-NAMES.
            OPEN INPUT MOVIM.
            OPEN I-O EMPINX.
            READ MOVIM.
@@ -207,13 +236,22 @@
            MOVE MES(FECHA-MM)    TO EMS-T1-MM.
            MOVE FECHA-DD         TO EMS-T1-DD.
 
+       102-LOAD-DEPT-NAMES.
+           MOVE "ADMINISTRACION"   TO DEPT-FULL(1).
+           MOVE "CONTADURIA"       TO DEPT-FULL(2).
+           MOVE "SISTEMAS"         TO DEPT-FULL(3).
+           MOVE "TECNOLOGIA"       TO DEPT-FULL(4).
+           MOVE "RECURSOS HUMANOS" TO DEPT-FULL(5).
+           MOVE "MERCADOTECNIA"    TO DEPT-FULL(6).
+           MOVE "ZERO"             TO DEPT-FULL(7).
+
        201-READ-MOVIM.
            READ MOVIM AT END MOVE 1 TO MOV-EOF.
 
        202-LOAD-TMP-FILE SECTION.
            PERFORM 201-READ-MOVIM
            PERFORM 203-SCAN-MOVIM UNTIL MOV-EOF = 1.
-           GO TO END-PROG.
+           GO TO END-SEC1.
 
        203-SCAN-MOVIM.
            MOVE MOV-NOMI TO EMI-NOMI.
@@ -244,7 +282,7 @@
            PERFORM 201-READ-MOVIM.
 
       *> VERIFY THIS!
-       END-PROG.
+       END-SEC1.
 
        204-GENERATE-REP SECTION.
            OPEN OUTPUT EMPREP.
@@ -253,6 +291,9 @@
            MOVE TMP-DEPT TO ANT-DEPT.
            MOVE TMP-NOMI TO ANT-NOMI.
            PERFORM 206-BUILD-DOC UNTIL TMP-EOF = 1.
+           PERFORM 210-DEPT-CUT.
+           PERFORM 212-ORG-CUT.
+           GO TO END-SEC2.
 
        205-READ-TMP-FILE.
            RETURN TMP-FILE AT END MOVE 1 TO TMP-EOF.
@@ -265,18 +306,27 @@
                PERFORM 209-EMPL-CUT.
            IF ANT-DEPT NOT = TMP-DEPT
                PERFORM 210-DEPT-CUT.
-           MOVE TMP-DEPT TO EMS-TAB-DEPT.
-           MOVE TMP-NOMI TO EMS-TAB-NOMI.
-           MOVE TMP-NOMB TO EMS-TAB-NOMB.
+
+           IF DEPT-FLAG = 1
+               PERFORM 211-DEPT-NAME-CHOICE
+               MOVE 0 TO DEPT-FLAG
+           ELSE
+               MOVE SPACES TO EMS-TAB-DEPT.
+           IF NAME-FLAG = 1
+               MOVE TMP-NOMI TO EMS-TAB-NOMI
+               MOVE TMP-NOMB TO EMS-TAB-NOMB
+               MOVE 0 TO NAME-FLAG
+               ADD 1 TO EMPL-ST
+           ELSE
+               MOVE " " TO EMS-TAB-NOMI
+               MOVE SPACES TO EMS-TAB-NOMB.
            MOVE TMP-CLAV TO EMS-TAB-CLAV.
            MOVE TMP-PERC TO EMS-TAB-PERC.
            MOVE TMP-DEDU TO EMS-TAB-DEDU.
            WRITE EMR-REG FROM EMS-TAB-INFO AFTER 1 LINE.
            ADD 1 TO LIN.
-           ADD 1 TO EMPL-ST.
            ADD TMP-PERC TO PERC-ST.
            ADD TMP-DEDU TO DEDU-ST.
-           DISPLAY LIN.
            PERFORM 205-READ-TMP-FILE.
 
 
@@ -295,11 +345,22 @@
 
        209-EMPL-CUT.
            COMPUTE SUEL-EMPL = PERC-ST - DEDU-ST.
-           MOVE SUEL-EMPL TO EMS-CE-SALA.
            MOVE TMP-NOMI TO ANT-NOMI.
-           WRITE EMR-REG FROM EMS-CORTE-EMPL AFTER 2 LINES.
+      *> IF WE WANT TO PRINT THE SALARY UNCOMENT THE NEXT 4 LINES
+      *     MOVE SUEL-EMPL TO EMS-CE-SALA.
+      *     WRITE EMR-REG FROM EMS-CORTE-EMPL AFTER 2 LINES.
+      *     WRITE EMR-REG FROM SPACES AFTER 1 LINE.
+      *     ADD 2 TO LIN.
+           MOVE ANT-NOMI TO EMI-NOMI.
+           MOVE TMP-NOMB TO EMI-NOMB.
+           MOVE TMP-DEPT TO EMI-DEPT.
+           MOVE SUEL-EMPL TO EMI-SUEL.
+           REWRITE EMI-REG.
+           READ EMPINX.
+      *> TO VERIFY THE SALARIES IN EMPINX
+      *     DISPLAY EMI-NOMI, ",", EMI-NOMB, ",", EMI-DEPT, ",", EMI-SUEL.
            MOVE 0 TO SUEL-EMPL.
-           ADD 2 TO LIN.
+           MOVE 1 TO NAME-FLAG.
 
        210-DEPT-CUT.
            COMPUTE SUEL-ST = PERC-ST - DEDU-ST.
@@ -312,14 +373,29 @@
            MOVE DEDU-ST TO EMS-CD-DEDU.
            MOVE SUEL-ST TO EMS-CD-SALA.
            WRITE EMR-REG FROM EMS-CORTE-DEPT AFTER 2 LINES.
-      *> Verigy if this works
            INITIALISE EMPL-ST, PERC-ST, DEDU-ST, SUEL-ST
-      *     MOVE 0 TO EMPL-ST.
-      *     MOVE 0 TO PERC-ST.
-      *     MOVE 0 TO DEDU-ST.
-      *     MOVE 0 TO SUEL-ST.
            MOVE TMP-DEPT TO ANT-DEPT.
+           MOVE 1 TO DEPT-FLAG.
            PERFORM 207-NEW-PAGE.
+
+       212-ORG-CUT.
+           MOVE ORG-EMPL TO EMS-CO-EMPL.
+           MOVE ORG-PERC TO EMS-CO-PERC.
+           MOVE ORG-DEDU TO EMS-CO-DEDU.
+           MOVE ORG-SUEL TO EMS-CO-SALA.
+           WRITE EMR-REG FROM EMS-CORTE-ORG AFTER 2 LINES.
+
+       END-SEC2.
+
+       211-DEPT-NAME-CHOICE.
+           MOVE LENGTH OF TMP-DEPT TO STR-LENGHT-S.
+           MOVE TMP-DEPT TO STR-S.
+           PERFORM VARYING I FROM 1 BY 1 UNTIL I > 7
+               MOVE LENGTH OF DEPT-FULL(I) TO STR-LENGHT-F
+               MOVE DEPT-FULL(I) TO STR-F
+               IF CHAR-S(1) = CHAR-F(1)
+                   MOVE DEPT-FULL(I) TO EMS-TAB-DEPT
+           END-PERFORM.
 
 
        END PROGRAM EmpNom.
