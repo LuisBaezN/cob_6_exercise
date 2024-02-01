@@ -67,7 +67,7 @@
            MOVE 22215              TO NOMI-D(8).
            MOVE 12345              TO NOMI-D(9).
            MOVE 13135              TO NOMI-D(10).
-           MOVE 44444              TO NOMI-D(11).
+           MOVE 0                  TO NOMI-D(11).
 
        GENERATE-RAND.
            COMPUTE N-RAND1 = FUNCTION RANDOM(I) * 10000000000000000.
