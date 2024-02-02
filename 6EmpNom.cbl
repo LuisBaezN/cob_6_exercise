@@ -1,6 +1,6 @@
       ******************************************************************
       * Author: Luis Angel Baez Nieto
-      * Date:
+      * Date: 01/02/2024
       * Purpose: Project learning 6
       * Tectonics: cobc
       ******************************************************************
@@ -54,6 +54,7 @@
        77  PAG             PIC 999.
        77  ANT-DEPT        PIC X(03).
        77  ANT-NOMI        PIC 9(06).
+       77  ANT-NOMB        PIC X(15).
        77  SUEL-EMPL       PIC S9(05)V99.
        77  EMPL-ST         PIC 9(04).
        77  PERC-ST         PIC 9(08)V99.
@@ -290,6 +291,7 @@
            COMPUTE LIN = LINLIM + 1.
            MOVE TMP-DEPT TO ANT-DEPT.
            MOVE TMP-NOMI TO ANT-NOMI.
+           MOVE TMP-NOMB TO ANT-NOMB.
            PERFORM 206-BUILD-DOC UNTIL TMP-EOF = 1.
            PERFORM 210-DEPT-CUT.
            PERFORM 212-ORG-CUT.
@@ -345,20 +347,18 @@
 
        209-EMPL-CUT.
            COMPUTE SUEL-EMPL = PERC-ST - DEDU-ST.
+           MOVE ANT-NOMI TO EMI-NOMI.
+           MOVE ANT-NOMB TO EMI-NOMB.
+           MOVE TMP-DEPT TO EMI-DEPT.
+           MOVE SUEL-EMPL TO EMI-SUEL.
+           REWRITE EMI-REG.
            MOVE TMP-NOMI TO ANT-NOMI.
+           MOVE TMP-NOMB TO ANT-NOMB.
       *> IF WE WANT TO PRINT THE SALARY UNCOMENT THE NEXT 4 LINES
       *     MOVE SUEL-EMPL TO EMS-CE-SALA.
       *     WRITE EMR-REG FROM EMS-CORTE-EMPL AFTER 2 LINES.
       *     WRITE EMR-REG FROM SPACES AFTER 1 LINE.
       *     ADD 2 TO LIN.
-           MOVE ANT-NOMI TO EMI-NOMI.
-           MOVE TMP-NOMB TO EMI-NOMB.
-           MOVE TMP-DEPT TO EMI-DEPT.
-           MOVE SUEL-EMPL TO EMI-SUEL.
-           REWRITE EMI-REG.
-           READ EMPINX.
-      *> TO VERIFY THE SALARIES IN EMPINX
-      *     DISPLAY EMI-NOMI, ",", EMI-NOMB, ",", EMI-DEPT, ",", EMI-SUEL.
            MOVE 0 TO SUEL-EMPL.
            MOVE 1 TO NAME-FLAG.
 
