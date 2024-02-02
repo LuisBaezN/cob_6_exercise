@@ -104,7 +104,7 @@
                PERFORM PROC-CAPT
                WRITE EMI-REG
                ADD 1 TO WS-AUT
-               DISPLAY "ALTA SATISFACTORIA", WS-AUT
+               DISPLAY "ALTA SATISFACTORIA ", WS-AUT
            ELSE
                DISPLAY "EL EMPLEADO YA EXISTE".
 
@@ -120,7 +120,7 @@
                IF RESP = "S"
                    DELETE EMPINX
                    ADD 1 TO WS-AUT
-                   DISPLAY "BAJA SATISFACTORIA", WS-AUT
+                   DISPLAY "BAJA SATISFACTORIA ", WS-AUT
                ELSE
                    DISPLAY "BAJA CANCELADA".
 
@@ -137,7 +137,7 @@
                    PERFORM PROC-CAPT
                    REWRITE EMI-REG
                    ADD 1 TO WS-AUT
-                   DISPLAY "MODIFICACION SATISFACTORIA", WS-AUT
+                   DISPLAY "MODIFICACION SATISFACTORIA ", WS-AUT
                ELSE
                    DISPLAY "MODIFICACION CANCELADA".
 

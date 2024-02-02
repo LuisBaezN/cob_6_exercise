@@ -34,7 +34,7 @@
        MAIN-PROCEDURE.
            PERFORM INICIALIZACION.
            OPEN OUTPUT MOVIM.
-           PERFORM VARYING I FROM 1 BY 1 UNTIL I = 102
+           PERFORM VARYING I FROM 1 BY 1 UNTIL I > 10
                PERFORM GENERATE-RAND
                MOVE NOMI-D(N-RAND1) TO MOV-NOMI
                MOVE CLAVE(N-RAND2) TO MOV-CLAV
@@ -57,21 +57,17 @@
            MOVE "Pago prestamo"    TO CLAVE(10).
            MOVE "Vales        "    TO CLAVE(11).
 
-           MOVE 32421              TO NOMI-D(1).
-           MOVE 87343              TO NOMI-D(2).
-           MOVE 23491              TO NOMI-D(3).
-           MOVE 45861              TO NOMI-D(4).
-           MOVE 78562              TO NOMI-D(5).
-           MOVE 98752              TO NOMI-D(6).
-           MOVE 12348              TO NOMI-D(7).
-           MOVE 22215              TO NOMI-D(8).
-           MOVE 12345              TO NOMI-D(9).
-           MOVE 13135              TO NOMI-D(10).
-           MOVE 0                  TO NOMI-D(11).
+           MOVE 0                  TO NOMI-D(1).
+           MOVE 1                  TO NOMI-D(2).
+           MOVE 2                  TO NOMI-D(3).
+           MOVE 3                  TO NOMI-D(4).
+           MOVE 4                  TO NOMI-D(5).
+           MOVE 5                  TO NOMI-D(6).
+           MOVE 7                  TO NOMI-D(7).
 
        GENERATE-RAND.
-           COMPUTE N-RAND1 = FUNCTION RANDOM(I) * 10000000000000000.
-           COMPUTE N-RAND1 = FUNCTION MOD(N-RAND1, 11) + 1.
+           COMPUTE N-RAND1 = FUNCTION RANDOM() * 10000000000000000.
+           COMPUTE N-RAND1 = FUNCTION MOD(N-RAND1, 7) + 1.
 
            COMPUTE N-RAND2 = FUNCTION RANDOM(I*I)*10000000000000000.
            COMPUTE N-RAND2 = FUNCTION MOD(N-RAND2, 11) + 1.

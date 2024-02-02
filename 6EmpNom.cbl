@@ -47,6 +47,7 @@
        77  I               PIC 9.
        77  NAME-FLAG       PIC 9 VALUE 1.
        77  DEPT-FLAG       PIC 9 VALUE 1.
+       77  END-FLAG        PIC 9.
        77  MOV-EOF         PIC 9.
        77  TMP-EOF         PIC 9.
        77  LIN             PIC 99.
@@ -55,6 +56,8 @@
        77  ANT-DEPT        PIC X(03).
        77  ANT-NOMI        PIC 9(06).
        77  ANT-NOMB        PIC X(15).
+       77  PERC-EMPL       PIC 9(08)V99.
+       77  DEDU-EMPL       PIC 9(08)V99.
        77  SUEL-EMPL       PIC S9(05)V99.
        77  EMPL-ST         PIC 9(04).
        77  PERC-ST         PIC 9(08)V99.
@@ -214,7 +217,6 @@
            PERFORM 102-LOAD-DEPT-NAMES.
            OPEN INPUT MOVIM.
            OPEN I-O EMPINX.
-           READ MOVIM.
 
 
        200-PROCESS.
@@ -292,6 +294,8 @@
            MOVE TMP-NOMI TO ANT-NOMI.
            MOVE TMP-NOMB TO ANT-NOMB.
            PERFORM 206-BUILD-DOC UNTIL TMP-EOF = 1.
+           PERFORM 209-EMPL-CUT.
+           MOVE 1 TO END-FLAG.
            PERFORM 210-DEPT-CUT.
            PERFORM 212-ORG-CUT.
            GO TO END-SEC2.
@@ -325,6 +329,8 @@
            MOVE TMP-DEDU TO EMS-TAB-DEDU.
            WRITE EMR-REG FROM EMS-TAB-INFO AFTER 1 LINE.
            ADD 1 TO LIN.
+           ADD TMP-PERC TO PERC-EMPL.
+           ADD TMP-DEDU TO DEDU-EMPL.
            ADD TMP-PERC TO PERC-ST.
            ADD TMP-DEDU TO DEDU-ST.
            PERFORM 205-READ-TMP-FILE.
@@ -344,15 +350,15 @@
            WRITE EMR-REG FROM EMS-TAB-SEP AFTER 1 LINE.
 
        209-EMPL-CUT.
-           COMPUTE SUEL-EMPL = PERC-ST - DEDU-ST.
+           COMPUTE SUEL-EMPL = PERC-EMPL - DEDU-EMPL.
            MOVE ANT-NOMI TO EMI-NOMI.
            MOVE ANT-NOMB TO EMI-NOMB.
-           MOVE TMP-DEPT TO EMI-DEPT.
+           MOVE ANT-DEPT TO EMI-DEPT.
            MOVE SUEL-EMPL TO EMI-SUEL.
            REWRITE EMI-REG.
            MOVE TMP-NOMI TO ANT-NOMI.
            MOVE TMP-NOMB TO ANT-NOMB.
-           MOVE 0 TO SUEL-EMPL.
+           INITIALISE PERC-EMPL, PERC-EMPL, SUEL-EMPL.
            MOVE 1 TO NAME-FLAG.
 
        210-DEPT-CUT.
@@ -369,7 +375,8 @@
            INITIALISE EMPL-ST, PERC-ST, DEDU-ST, SUEL-ST
            MOVE TMP-DEPT TO ANT-DEPT.
            MOVE 1 TO DEPT-FLAG.
-           PERFORM 207-NEW-PAGE.
+           IF END-FLAG = 0
+               PERFORM 207-NEW-PAGE.
 
        212-ORG-CUT.
            MOVE ORG-EMPL TO EMS-CO-EMPL.
