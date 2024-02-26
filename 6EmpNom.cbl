@@ -274,13 +274,17 @@
            MOVE EMI-NOMB TO TMP-NOMB.
            MOVE MOV-CLAV TO TMP-CLAV.
            MOVE MOV-CLAV TO CLAVES-P.
+      *> VERIFIED INVALID DEPT
            IF CLAV-P
                MOVE MOV-IMP TO TMP-PERC
-               MOVE ZEROES  TO TMP-DEDU
-           ELSE
+               MOVE ZEROES  TO TMP-DEDU.
+           MOVE MOV-CLAV TO CLAVES-D.
+           IF CLAV-D
                MOVE MOV-IMP TO TMP-DEDU
-               MOVE ZEROES  TO TMP-PERC.
-
+               MOVE ZEROES  TO TMP-PERC
+           ELSE
+               MOVE ZEROES  TO TMP-PERC
+               MOVE ZEROES  TO TMP-DEDU.
            RELEASE TMP-REG.
            PERFORM 201-READ-MOVIM.
 
